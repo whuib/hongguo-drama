@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { commentIsBlocked, resizeDanmaku } from './danmakuModel.mjs';
 import { createOfficialFeed, appendOfficialPage, advanceTimedDanmaku, resolveDanmakuStatus } from './danmakuOfficial.mjs';
 import './CommentDanmaku.css';
+import DanmakuContent from './DanmakuContent';
 
 /**
  * 官方弹幕叠层：按视频时间投放。
@@ -199,7 +200,7 @@ export default function OfficialDanmaku({ videoRef, source, available, danmaku }
   return <div ref={layerRef} className={`comment-danmaku ${reducedMotion ? 'comment-danmaku-static' : ''}`}>
     <div aria-hidden="true" style={{ opacity: settings.opacity / 100, fontSize: settings.fontSize }}>
       {((list.length ? items : [])).map(item => <span className="comment-danmaku-item" key={item.id} ref={node => { if (node) nodes.current.set(item.id, node); else nodes.current.delete(item.id); }}
-        style={{ transform: `translate(${item.x}px, ${item.y}px)`, color: item.color || '#FFFFFF' }}>{item.text}</span>)}
+        style={{ transform: `translate(${item.x}px, ${item.y}px)`, color: item.color || '#FFFFFF' }}><DanmakuContent item={item} /></span>)}
     </div>
     {((loading && !items.length) || error || !list.length) && <span className="comment-danmaku-status" role="status">{t(status)}</span>}
   </div>;

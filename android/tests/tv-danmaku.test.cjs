@@ -130,12 +130,15 @@ test('关闭仅Native.cancel弹幕id，独立在途视频仍可完成；迟到�
 test('暂停停移动，恢复和倍速只随媒体时钟；前后seek清旧轨迹与回放队列', async () => {
   const h = await fixture();
   try {
-    await h.ready();h.respond(h.official()[0],rawPage(h.stage.dataset.vid,[[0,'开头'],[4.9,'同文'],[5,'同文'],[5.1,'同文'],[11,'后段']]));await h.flush();
+    await h.ready();h.respond(h.official()[0],rawPage(h.stage.dataset.vid,[[0,'开头'],[4.9,'同文[爱慕]'],[5,'同文[爱慕]'],[5.1,'同文[爱慕]'],[11,'后段']]));await h.flush();
     await h.move(0.2);const old=h.items()[0],x=old.style.transform;h.video.pause();await h.flush();
     assert.equal(old.style.transform,x);assert.equal(h.listenerCount(h.video,'pause'),h.originalPauseListeners+1);
     h.video.playbackRate=2;await h.video.play();await h.flush();await h.move(0.4);assert.notEqual(old.style.transform,x);
     h.video.currentTime=4.9;h.video.seeking=true;h.emit(h.video,'seeking');assert.equal(h.items().length,0);
-    h.video.seeking=false;h.emit(h.video,'seeked');await h.flush();assert(h.items().some(n=>n.textContent==='同文 × 3'));
+    h.video.seeking=false;h.emit(h.video,'seeked');await h.flush();
+    const repeated = h.items().find(node => node.textContent === '同文× 3');
+    assert.equal(repeated?.querySelector('.danmaku-count')?.textContent, '× 3');
+    assert.equal(repeated?.querySelector('.danmaku-emoji')?.src, './danmaku-emoji/aimu.webp');
     assert(!h.items().some(n=>n.textContent==='开头'));
     h.video.currentTime=0;h.emit(h.video,'seeking');assert.equal(h.items().length,0);h.emit(h.video,'seeked');await h.flush();
     assert(h.items().some(n=>n.textContent==='开头'));assert(!h.items().some(n=>n.textContent==='后段'));

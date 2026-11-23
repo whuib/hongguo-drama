@@ -2,7 +2,8 @@
 // https://github.com/dawei233/hongguo-drama
 // 时间轴投放与评论队列分开；两种来源共用视觉设置、轨道布局和窗口重排。
 
-import { commentIsBlocked, danmakuLayout, retireDanmaku, takeDanmakuReplay, groupDanmaku, danmakuText } from './danmakuModel.mjs';
+import { commentIsBlocked, danmakuLayout, retireDanmaku, takeDanmakuReplay, groupDanmaku } from './danmakuModel.mjs';
+import { createDanmakuDisplay } from './danmakuDisplay.mjs';
 
 export const DANMAKU_SOURCES = Object.freeze(['official', 'comments']);
 
@@ -198,11 +199,10 @@ export function advanceTimedDanmaku(state, danmaku, currentTime, elapsed, option
       entry = list.find(item => item.time === entry.time && item.text === entry.text) || entry;
     }
 
-    const text = danmakuText(entry.text, entry.count);
-    const textWidth = (Array.from(text).length + 1) * settings.fontSize;
+    const display = createDanmakuDisplay(entry.text, entry.count);
     state.items.push({
       id: state.nextId++,
-      text,
+      ...display,
       content: entry.text,
       entry,
       color: entry.color,
@@ -210,7 +210,7 @@ export function advanceTimedDanmaku(state, danmaku, currentTime, elapsed, option
       lane,
       x: reducedMotion ? 12 : width,
       y: top + lane * lineHeight,
-      width: textWidth,
+      width: display.widthEm * settings.fontSize,
       age: 0,
     });
     state.cooldown = reducedMotion ? REDUCED_MOTION_READ_SECONDS : (EMIT_INTERVAL[settings.density] ?? EMIT_INTERVAL.normal);

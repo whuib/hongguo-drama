@@ -428,6 +428,13 @@ public class MainActivity extends Activity {
         if ("/image".equals(p)) {
             return imageResource(checked(uri.getQueryParameter("url"),true));
         }
+        if (p != null && p.matches("/danmaku-emoji/[a-z0-9-]{1,40}\\.(png|webp)")) {
+            synchronized (requestLock) {
+                requireBusinessOpen();
+                String mime = p.endsWith(".png") ? "image/png" : "image/webp";
+                return response(200,"OK",mime,trackResource(getAssets().open(p.substring(1))),null);
+            }
+        }
         String asset = "/index.html".equals(p) ? "index.html" : "/app.js".equals(p) ? "app.js" : "/style.css".equals(p) ? "style.css" : "/app.css".equals(p) ? "app.css" : "/boot.js".equals(p) ? "boot.js" : isTv() && "/tv-startup.js".equals(p) ? "tv-startup.js" : null;
         if (asset == null) throw new IOException();
         synchronized (requestLock) {

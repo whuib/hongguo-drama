@@ -52,7 +52,25 @@ export function connectTvDanmaku() {
       let node = owner.nodes.get(item.id);
       if (!node) {
         node = document.createElement('span'); node.className = 'tv-danmaku-item';
-        node.textContent = item.text; node.style.color = item.color || '#FFFFFF';
+        node.style.color = item.color || '#FFFFFF';
+        for (const segment of item.segments) {
+          if (typeof segment === 'string') {
+            node.append(segment);
+          } else {
+            const image = document.createElement('img');
+            image.className = 'danmaku-emoji';
+            image.alt = segment.alt;
+            image.src = segment.src;
+            image.draggable = false;
+            node.append(image);
+          }
+        }
+        if (item.countLabel) {
+          const count = document.createElement('span');
+          count.className = 'danmaku-count';
+          count.textContent = item.countLabel;
+          node.append(count);
+        }
         owner.nodes.set(item.id, node); owner.items.append(node);
       }
       node.style.transform = `translate(${item.x}px, ${item.y}px)`;

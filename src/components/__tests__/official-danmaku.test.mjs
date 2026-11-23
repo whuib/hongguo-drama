@@ -24,9 +24,11 @@ test('时间轴相同内容只聚合首条起五秒内，重取不累计，远�
   assert.equal(feed.danmaku.length, 4);
   assert.deepEqual(feed.groupedDanmaku.map(item => [item.time, item.text, item.count]), [[1, '好看', 2], [5, '其他', 1], [7, '好看', 1]]);
   advanceTimedDanmaku(feed.animation, feed.groupedDanmaku, 1, 0.016, options());
-  assert.equal(feed.animation.items[0].text, '好看 × 2');
+  assert.equal(feed.animation.items[0].text, '好看');
+  assert.equal(feed.animation.items[0].count, 2);
+  assert.equal(feed.animation.items[0].countLabel, '× 2');
   assert.equal(feed.animation.items[0].content, '好看');
-  assert.ok(feed.animation.items[0].width >= Array.from('好看 × 2').length * DEFAULT_DANMAKU_SETTINGS.fontSize);
+  assert.ok(feed.animation.items[0].width > 3 * DEFAULT_DANMAKU_SETTINGS.fontSize);
   appendOfficialPage(feed, page);
   advanceTimedDanmaku(feed.animation, feed.groupedDanmaku, 1, 0.016, options());
   assert.equal(feed.animation.items.length, 1, '重取后不能重发仍在屏上的聚合条目');

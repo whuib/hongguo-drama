@@ -2,6 +2,7 @@ import { t, useLanguage } from '../i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_DANMAKU_SETTINGS, normalizeDanmakuSettings, createCommentFeed, appendCommentPage, commentIsBlocked, advanceDanmaku, resizeDanmaku } from './danmakuModel.mjs';
 import './CommentDanmaku.css';
+import DanmakuContent from './DanmakuContent';
 
 const STORAGE_KEY = 'hongguo:comment-danmaku:v1';
 const EMPTY = [];
@@ -89,7 +90,7 @@ export default function CommentDanmaku({ videoRef, source, available, danmaku })
     state.items = state.items.filter(item => !commentIsBlocked(item.content, settings));
     let nextY = 12;
     for (const item of [...state.items].sort((a, b) => a.y - b.y)) {
-      item.width = (Array.from(item.text).length + 1) * settings.fontSize;
+      item.width = item.widthEm * settings.fontSize;
       item.y = Math.max(item.y, nextY);
       nextY = item.y + settings.fontSize + 12;
     }
@@ -155,7 +156,7 @@ export default function CommentDanmaku({ videoRef, source, available, danmaku })
   return <div ref={layerRef} className={`comment-danmaku ${reducedMotion ? 'comment-danmaku-static' : ''}`}>
     <div aria-hidden="true" style={{ opacity: settings.opacity / 100, fontSize: settings.fontSize }}>
       {(comments.length ? items : EMPTY).map(item => <span className="comment-danmaku-item" key={item.id} ref={node => { if (node) nodes.current.set(item.id, node); else nodes.current.delete(item.id); }}
-        style={{ transform: `translate(${item.x}px, ${item.y}px)` }}>{item.text}</span>)}
+        style={{ transform: `translate(${item.x}px, ${item.y}px)` }}><DanmakuContent item={item} /></span>)}
     </div>
   </div>;
 }

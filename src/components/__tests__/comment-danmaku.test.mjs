@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import * as model from '../danmakuModel.mjs';
 import { DEFAULT_DANMAKU_SETTINGS, normalizeDanmakuSettings, advanceDanmaku } from '../danmakuModel.mjs';
+import { createDanmakuDisplay } from '../danmakuDisplay.mjs';
+import { danmakuEmojiFiles } from '../danmakuEmoji.mjs';
 
 test('评论按完整相同内容聚合，分页重复ID不增加计数，显示保留计数', () => {
   const feed = model.createCommentFeed('123456', '654321');
@@ -11,8 +14,39 @@ test('评论按完整相同内容聚合，分页重复ID不增加计数，显示
   assert.equal(feed.comments.length, 4, '原始评论保留');
   assert.deepEqual(feed.groupedComments.map(item => [item.content, item.count]), [['好看', 3], ['好看！', 1]]);
   advanceDanmaku(feed.animation, feed.groupedComments, 0.1, { width: 500, height: 300, settings: DEFAULT_DANMAKU_SETTINGS, reducedMotion: true });
-  assert.equal(feed.animation.items[0].text, '好看 × 3');
+  assert.equal(feed.animation.items[0].text, '好看');
+  assert.equal(feed.animation.items[0].count, 3);
   assert.equal(feed.animation.items[0].content, '好看');
+});
+
+test('弹幕就地替换连续表情，保留未知标签和普通文本', () => {
+  const text = '好看[爱慕][爽][捂脸][自定义] X2';
+  const display = createDanmakuDisplay(text, 123);
+  assert.equal(display.text, text);
+  assert.equal(display.count, 123);
+  assert.equal(display.countLabel, '× 123');
+  assert.deepEqual(display.segments, [
+    '好看',
+    { src: './danmaku-emoji/aimu.webp', alt: '[爱慕]' },
+    { src: './danmaku-emoji/1f60c.png', alt: '[爽]' },
+    { src: './danmaku-emoji/wulian.webp', alt: '[捂脸]' },
+    '[自定义] X2',
+  ]);
+  const single = createDanmakuDisplay(text);
+  assert.equal(single.countLabel, '');
+  assert.ok(display.widthEm - single.widthEm >= display.countLabel.length);
+  assert.ok(display.widthEm < Array.from(text).length);
+  for (const file of danmakuEmojiFiles.values()) {
+    assert.ok(existsSync(new URL(`../../../public/danmaku-emoji/${file}`, import.meta.url)), file);
+  }
+});
+
+test('弹幕截断以完整表情为单位，并保留 80 个显示单位上限', () => {
+  const text = `${'字'.repeat(78)}[捂脸]甲乙`;
+  const { segments } = createDanmakuDisplay(text);
+  assert.equal(segments[1].alt, '[捂脸]');
+  assert.equal(segments[2], '…');
+  assert.equal(createDanmakuDisplay('[爱慕]'.repeat(80)).segments.length, 80);
 });
 
 test('settings reject malformed storage and clamp supported numeric values', () => {

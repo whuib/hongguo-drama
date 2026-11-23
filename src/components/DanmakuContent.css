@@ -1,0 +1,13 @@
+.danmaku-emoji {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  object-fit: contain;
+  vertical-align: -.23em;
+}
+
+.danmaku-count {
+  margin-left: .3em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px #000, 0 2px 5px #000, 0 0 8px rgba(0, 0, 0, .8);
+}

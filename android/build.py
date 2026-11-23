@@ -67,6 +67,8 @@ def main():
         html = html.replace('src="app.js"', 'src="tv-startup.js"')
         (assets/'index.html').write_text(html)
         (assets/'style.css').write_text((assets/'style.css').read_text() + '\n' + (ROOT/'tv.css').read_text())
+        with (assets/'style.css').open('a') as style:
+            style.write('\n' + (ROOT.parent/'src/components/DanmakuContent.css').read_text())
         xml = (ROOT/'app/src/main/AndroidManifest.xml').read_text()
         xml = xml.replace('package="io.github.hongguo.personal"',f'package="{package_name}"').replace('android:versionCode="2"',f'android:versionCode="{version_code}"').replace('android:versionName="1.1"',f'android:versionName="{version}"')
         xml = xml.replace('<application ', '<uses-feature android:name="android.software.leanback" android:required="true" /><uses-feature android:name="android.hardware.touchscreen" android:required="false" /><application android:banner="@drawable/tv_banner" ')
@@ -82,6 +84,7 @@ def main():
         manifest.write_text(xml)
     run(['node',ROOT/'bundle.cjs',*(['--tv'] if tv else [])],env)
     if not tv: run(['node',ROOT/'mobile/bundle.cjs'],env)
+    shutil.copytree(ROOT.parent/'public/danmaku-emoji', assets/'danmaku-emoji', dirs_exist_ok=True)
     shutil.copy2(ROOT.parent/'build/icon.png',resources/'drawable/icon.png')
     for name in ['LICENSE','NOTICE','THIRD-PARTY-NOTICES.md']:
         shutil.copy2(ROOT.parent/name,assets/name)

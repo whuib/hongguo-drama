@@ -1,3 +1,5 @@
+import { createDanmakuDisplay } from './danmakuDisplay.mjs';
+
 export const DEFAULT_DANMAKU_SETTINGS = Object.freeze({ opacity: 80, fontSize: 22, speed: 1, area: 'half', density: 'normal', sensitiveFilter: true, blockedWords: '' });
 
 export function normalizeDanmakuSettings(value) {
@@ -46,12 +48,6 @@ export function groupDanmaku(items) {
     }
   }
   return groups;
-}
-
-export function danmakuText(content, count = 1) {
-  const chars = Array.from(content);
-  const text = chars.length > 80 ? `${chars.slice(0, 79).join('')}…` : content;
-  return count > 1 ? `${text} × ${count}` : text;
 }
 
 export function appendCommentPage(feed, data, settings) {
@@ -152,10 +148,10 @@ export function advanceDanmaku(state, comments, elapsed, { width, height, settin
       count = comments.find(comment => comment.content === content)?.count || 1;
     }
     if (!content) return changed;
-    const text = danmakuText(content, count);
-    const textWidth = (Array.from(text).length + 1) * settings.fontSize;
+    const display = createDanmakuDisplay(content, count);
+    const textWidth = display.widthEm * settings.fontSize;
     const x = reducedMotion ? 12 : state.nextId === 0 ? Math.max(12, width - textWidth - 12) : width;
-    state.items.push({ id: state.nextId++, text, content, lane, x, y: top + lane * lineHeight, width: textWidth, age: 0 });
+    state.items.push({ id: state.nextId++, ...display, content, lane, x, y: top + lane * lineHeight, width: textWidth, age: 0 });
     state.cooldown = reducedMotion ? 6 : { sparse: 0.9, normal: 0.5, dense: 0.25 }[settings.density];
     changed = true;
   }

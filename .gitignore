@@ -1,7 +1,7 @@
 # 红果短剧 7.9 源码候选：公开源码排除依赖、构建产物与本地运行资料。
 /*-small.png
 
-# 依赖
+# 依赖和本地构建目录（dist/ 包含 Mac DMG 与 ZIP）
 node_modules/
 dist/
 dist-audit-final/
@@ -24,6 +24,7 @@ out/
 *.asar
 *.exe
 *.dmg
+hongguo-downloader-*-mac-*.zip
 *.app
 *.AppImage
 
